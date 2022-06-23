@@ -188,7 +188,7 @@ class DataTransform():
                 SubtractMeans(color_mean)  # BGRの色の平均値を引き算
             ]),
             'val': Compose([
-                ConvertFromInts(),  # intをfloatに変換
+                ConvertFromInts(),  # intをfloat32に変換
                 Resize(input_size),  # 画像サイズをinput_size×input_sizeに変形
                 SubtractMeans(color_mean)  # BGRの色の平均値を引き算
             ])

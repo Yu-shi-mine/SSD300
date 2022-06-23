@@ -144,3 +144,4 @@ def encode(matched, priors, variances):
     g_wh = torch.log(g_wh) / variances[1]
     # return target for smooth_l1_loss
     return torch.cat([g_cxcy, g_wh], 1)  # [num_priors,4]
+    
