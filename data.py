@@ -30,22 +30,22 @@ def make_datapath_list(img_path:str, img_extension:str, xml_path:str, division_r
     """
 
     # globでファイルを一括取得
-    img_files = glob.glob(os.path.join(img_path, '*' + img_extension))
-    xml_files = glob.glob(os.path.join(xml_path, '*.xml'))
+    img_list = glob.glob(os.path.join(img_path, '*' + img_extension))   # -> list[path1, path2, path3, ...]
+    xml_list = glob.glob(os.path.join(xml_path, '*.xml'))               # -> list[path1, path2, path3, ...]
 
     # 教師データの数 = division_ratio × 教師データの総数
-    train_num = int(division_ratio * len(img_files))
+    train_num = int(division_ratio * len(img_list))     # -> int
 
     # train用データを [0:train_num] で取得
-    train_img_files = img_files[:train_num]
-    train_xml_files = xml_files[:train_num]
+    train_img_list = img_list[:train_num]   # -> list[path1, path2, path3, ...]
+    train_xml_list = xml_list[:train_num]   # -> list[path1, path2, path3, ...]
 
     # validation用データを [train_num:] で取得
-    val_img_files = img_files[train_num:]
-    val_xml_files = xml_files[train_num:]
+    val_img_list = img_list[train_num:]     # -> list[path1, path2, path3, ...]
+    val_xml_list = xml_list[train_num:]     # -> list[path1, path2, path3, ...]
 
     # 各データへのパスを格納したリストを返す
-    return train_img_files, train_xml_files, val_img_files, val_xml_files
+    return train_img_list, train_xml_list, val_img_list, val_xml_list
 
 class Anno_xml2list(object):
     """
@@ -57,7 +57,7 @@ class Anno_xml2list(object):
     def __init__(self, classes:list):
         self.classes = classes
     
-    def __call__(self, xml_path:str, width:int, height:int):
+    def __call__(self, xml_path:str, width:int, height:int) -> np.ndarray:
         """
         1枚の画像に対する「XML形式のアノテーションデータ」を、画像サイズで規格化してからリスト形式に変換する。
 
@@ -103,13 +103,13 @@ class Anno_xml2list(object):
                 bndbox.append(cur_pixel)
 
             # アノテーションのクラス名のindexを取得して追加
-            label_idx = self.classes.index(name)
-            bndbox.append(label_idx)
+            class_idx = self.classes.index(name)
+            bndbox.append(class_idx)
 
-            # resに[xmin, ymin, xmax, ymax, label_ind]を足す
+            # resに[xmin, ymin, xmax, ymax, class_idx]を足す
             annotations += [bndbox]
 
-        return np.array(annotations)  # [[xmin, ymin, xmax, ymax, name], ... ]
+        return np.array(annotations)  # -> [[xmin, ymin, xmax, ymax, class_idx], ... ]
 
 class DataTransform():
     """
@@ -132,7 +132,7 @@ class DataTransform():
             ])
         }
     
-    def __call__(self, img:np.ndarray, phase:str, boxes, labels):
+    def __call__(self, img:np.ndarray, phase:str, boxes, labels) ->object:
         """
         画像とアノテーションの前処理クラス。
         学習時はデータオーギュメンテーションする。
@@ -166,7 +166,7 @@ class OD_Dataset(data.Dataset):
         self.transform = transform  # 画像の変形
         self.transform_anno = transform_anno  # アノテーションデータをxmlからリストへ
     
-    def __len__(self):
+    def __len__(self) -> int:
         """
         画像の枚数を返す
         """
@@ -176,7 +176,7 @@ class OD_Dataset(data.Dataset):
         """
         前処理をした画像のテンソル形式のデータとアノテーションを取得
         """
-        im, gt, _, _ = self.pull_item(index)
+        im, gt, _, _ = self.pull_item(index)    # -> 画像、真値、高さ、幅
         return im, gt
 
     def pull_item(self, index):
