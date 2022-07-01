@@ -15,7 +15,7 @@ import torch.utils.data as data
 
 from utils.data_augumentation import Compose, ConvertFromInts, ToAbsoluteCoords, PhotometricDistort, Expand, RandomSampleCrop, RandomMirror, ToPercentCoords, Resize, SubtractMeans
 
-def make_datapath_list(img_path:str, img_extension:str, xml_path:str, division_ratio=0.8):
+def make_datapath_list(img_path:str, img_extension:str, xml_path:str, division_ratio=0.8) -> tuple[list[str], list[str], list[str], list[str]]:
     """
     教師データへのパスを格納したリストを作成する
 
@@ -30,19 +30,19 @@ def make_datapath_list(img_path:str, img_extension:str, xml_path:str, division_r
     """
 
     # globでファイルを一括取得
-    img_list = glob.glob(os.path.join(img_path, '*' + img_extension))   # -> list[path1, path2, path3, ...]
-    xml_list = glob.glob(os.path.join(xml_path, '*.xml'))               # -> list[path1, path2, path3, ...]
+    img_list = glob.glob(os.path.join(img_path, '*' + img_extension))
+    xml_list = glob.glob(os.path.join(xml_path, '*.xml'))
 
     # 教師データの数 = division_ratio × 教師データの総数
-    train_num = int(division_ratio * len(img_list))     # -> int
+    train_num = int(division_ratio * len(img_list))
 
     # train用データを [0:train_num] で取得
-    train_img_list = img_list[:train_num]   # -> list[path1, path2, path3, ...]
-    train_xml_list = xml_list[:train_num]   # -> list[path1, path2, path3, ...]
+    train_img_list = img_list[:train_num]
+    train_xml_list = xml_list[:train_num]
 
     # validation用データを [train_num:] で取得
-    val_img_list = img_list[train_num:]     # -> list[path1, path2, path3, ...]
-    val_xml_list = xml_list[train_num:]     # -> list[path1, path2, path3, ...]
+    val_img_list = img_list[train_num:]
+    val_xml_list = xml_list[train_num:]
 
     # 各データへのパスを格納したリストを返す
     return train_img_list, train_xml_list, val_img_list, val_xml_list
@@ -54,7 +54,7 @@ class Anno_xml2list(object):
     Args:
         classes (list): クラス名を格納したリスト(20要素)
     """
-    def __init__(self, classes:list):
+    def __init__(self, classes:list) -> None:
         self.classes = classes
     
     def __call__(self, xml_path:str, width:int, height:int) -> np.ndarray:
